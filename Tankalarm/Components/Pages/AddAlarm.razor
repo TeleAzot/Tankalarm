@@ -1,0 +1,40 @@
+﻿@page "/AddAlarm"
+@inject NavigationManager NavigationManager
+
+<div class="row bg-primary text-white mt-5 pt-2 ps-2 pe-2">
+    <div class="col pt-1 ps-3">
+        <h1>Alarm hinzufügen</h1>
+    </div>
+    <div class="col col-auto">
+        <button class="btn btn-light bi bi-x h-auto" @onclick="Cancel"></button>
+    </div>
+</div>
+
+<form>
+    <div class="m-3">
+        <label class="form-label">Spritsorte</label>
+        <select class="form-select">
+            <option>E5</option>
+            <option>Diesel</option>
+        </select>
+    </div>
+    <div class="m-3">
+        <label class="form-label">Preis für Alarm</label>
+        <input type="number" class="form-control"/>
+    </div>
+    <div class="m-3">
+        <button type="submit" class="btn btn-primary">Alarm hinzufügen</button>
+    </div>
+</form>
+
+@code{
+    private async Task Submit()
+    {
+        await Permissions.RequestAsync<Permissions.PostNotifications>();
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

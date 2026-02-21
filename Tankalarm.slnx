@@ -1,3 +1,5 @@
 <Solution>
-  <Project Path="Tankalarm/Tankalarm.csproj" />
+  <Project Path="Tankalarm/Tankalarm.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
 </Solution>
