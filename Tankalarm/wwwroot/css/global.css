@@ -1,0 +1,68 @@
+/*#region Header*/
+header {
+    margin: 3em 0 1em 0;
+    padding: 0.3em 1em;
+    background-color: #219bff;
+}
+
+header.d-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+/*#endregion Header*/
+
+div.alarmcard {
+    display: grid;
+    grid-template-columns: 4fr 3fr 1fr 1fr;
+    gap: 0.5em;
+    align-items: center;
+    margin: 1em;
+    padding: 0.7em;
+    background-color: #fce17c;
+}
+
+button.icon-md {
+    font-size: 1.2em;
+    aspect-ratio: 1 / 1;
+}
+
+button.icon-lg {
+    font-size: 1.5em;
+    aspect-ratio: 1 / 1;
+}
+
+/*#region Form*/
+form > * {
+    margin: 1em 0;
+}
+
+form > input, form > select {
+    width: 40%;
+    height: 2em;
+    float: right;
+    margin-right: 1em;
+}
+
+form > select {
+    width: calc(40% + 0.55em);
+    height: calc(2em + 0.55em);
+}
+
+form > label {
+    float: left;
+    margin-left: 1em;
+    margin-top: calc(1em + 0.2em);
+}
+
+form > button {
+    margin-left: 1em;
+    margin-top: calc(1em + 0.2em);
+    height: 2.5em;
+    background-color: #d4ffa6;
+}
+
+form > br {
+    clear: both;
+}
+/*#endregion Form*/

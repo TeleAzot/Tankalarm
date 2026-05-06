@@ -1,42 +1,23 @@
 ﻿@page "/"
 @inject NavigationManager NavigationManager
 
-<div class="row bg-primary text-white mt-5 pt-2 ps-2 pe-2">
-    <div class="col pt-1 ps-3">
-        <h1>Aktive Alarme</h1>
-    </div>
-    <div class="col col-auto">
-        <button class="btn btn-light bi bi-plus-lg h-auto" @onclick="AddAlarm"></button>
-    </div>
+<header class="d-flex">
+    <h2>Aktive Alarme</h2>
+    <button class="icon-lg bi bi-plus" @onclick="AddAlarm"></button>
+</header>
+
+<div class="alarmcard">
+    <span>Diesel</span>
+    <span>1,60 €</span>
+    <button class="icon-md bi bi-pencil"></button>
+    <button class="icon-md bi bi-trash"></button>
 </div>
 
-<div class="row m-3 bg-info p-1">
-    <div class="col align-content-center">
-        <span class="fs-4">Diesel</span>
-    </div>
-    <div class="col align-content-center">
-        <span class="fs-4">1,60 €</span>
-    </div>
-    <div class="col col-auto p-1">
-        <button class="btn btn-warning bi bi-pencil"></button>
-    </div>
-    <div class="col col-auto p-1">
-        <button class="btn btn-danger bi bi-trash"></button>
-    </div>
-</div>
-<div class="row m-3 bg-info p-1">
-    <div class="col align-content-center">
-        <span class="fs-4">Super E5</span>
-    </div>
-    <div class="col align-content-center">
-        <span class="fs-4">1,70 €</span>
-    </div>
-    <div class="col col-auto p-1">
-        <button class="btn btn-warning bi bi-pencil"></button>
-    </div>
-    <div class="col col-auto p-1">
-        <button class="btn btn-danger bi bi-trash"></button>
-    </div>
+<div class="alarmcard">
+    <span class="">Super E5</span>
+    <span class="">1,70 €</span>
+    <button class="icon-md bi bi-pencil"></button>
+    <button class="icon-md bi bi-trash"></button>
 </div>
 
 @code

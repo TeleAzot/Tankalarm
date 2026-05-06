@@ -1,30 +1,22 @@
 ﻿@page "/AddAlarm"
 @inject NavigationManager NavigationManager
 
-<div class="row bg-primary text-white mt-5 pt-2 ps-2 pe-2">
-    <div class="col pt-1 ps-3">
-        <h1>Alarm hinzufügen</h1>
-    </div>
-    <div class="col col-auto">
-        <button class="btn btn-light bi bi-x h-auto" @onclick="Cancel"></button>
-    </div>
-</div>
+<header class="d-flex">
+    <h2>Alarme hinzufügen</h2>
+    <button class="icon-lg bi bi-x" @onclick="Cancel"></button>
+</header>
 
-<form>
-    <div class="m-3">
-        <label class="form-label">Spritsorte</label>
-        <select class="form-select">
-            <option>E5</option>
-            <option>Diesel</option>
-        </select>
-    </div>
-    <div class="m-3">
-        <label class="form-label">Preis für Alarm</label>
-        <input type="number" class="form-control"/>
-    </div>
-    <div class="m-3">
-        <button type="submit" class="btn btn-primary">Alarm hinzufügen</button>
-    </div>
+<form @onsubmit="Submit">
+    <label for="fuelType">Spritsorte:</label>
+    <select id="fuelType">
+        <option>E5</option>
+        <option>Diesel</option>
+    </select>
+    <br />
+    <label for="alarmPrice">Preis für Alarm (€):</label>
+    <input type="number" id="alarmPrice" />
+    <br />
+    <button type="submit">Alarm hinzufügen</button>
 </form>
 
 @code{
