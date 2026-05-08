@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Tankalarm.Database.Services;
+using Tankalarm.Data.DB.DBServices;
 
 namespace Tankalarm
 {

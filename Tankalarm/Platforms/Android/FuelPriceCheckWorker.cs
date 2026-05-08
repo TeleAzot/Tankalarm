@@ -3,7 +3,7 @@ using Android.Content;
 using AndroidX.Work;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using System.Net.Http;
-using Tankalarm.Database.Services;
+using Tankalarm.Data.DB.DBServices;
 using AndroidApp = Android.App.Application;
 using AndroidContext = Android.Content.Context;
 

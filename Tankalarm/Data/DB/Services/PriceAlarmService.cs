@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Tankalarm.Database.Models;
+using Tankalarm.Data.DB.Models;
 
-namespace Tankalarm.Database.Services
+namespace Tankalarm.Data.DB.DBServices
 {
     public class PriceAlarmService
     {

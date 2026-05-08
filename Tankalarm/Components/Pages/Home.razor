@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using Tankalarm.Data.API.Services
 @inject NavigationManager NavigationManager
 
 <header class="d-flex">
@@ -28,6 +29,13 @@
 
 @code
 {
+    protected override async Task OnInitializedAsync()
+    {
+        var apiClient = new TankerkoenigService();
+        var stat = await apiClient.GetCheapestFuelPricesAsync(10.024963, 48.797592, 5, "E5");
+        await base.OnInitializedAsync();
+    }
+
     private void AddAlarm()
     {
         NavigationManager.NavigateTo("AddAlarm");
