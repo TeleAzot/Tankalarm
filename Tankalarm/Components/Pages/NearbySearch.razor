@@ -1,0 +1,15 @@
+﻿@page "/NearbySearch"
+@inject NavigationManager NavigationManager
+
+<header class="d-flex">
+    <h2>Umkreissuche</h2>
+    <button class="icon-lg bi bi-house" @onclick="Home"></button>
+</header>
+
+@code
+{
+    private void Home()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

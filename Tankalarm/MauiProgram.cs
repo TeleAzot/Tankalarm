@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Tankalarm.Database.Services;
 
 namespace Tankalarm
 {
@@ -15,9 +16,10 @@ namespace Tankalarm
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddSingleton<PriceAlarmService>();
 
 #if DEBUG
-    		builder.Services.AddBlazorWebViewDeveloperTools();
+            builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
 

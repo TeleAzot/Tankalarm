@@ -3,6 +3,7 @@ using Android.Content;
 using AndroidX.Work;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using System.Net.Http;
+using Tankalarm.Database.Services;
 using AndroidApp = Android.App.Application;
 using AndroidContext = Android.Content.Context;
 
@@ -10,15 +11,28 @@ namespace Tankalarm.Platforms.Android
 {
     public class FuelPriceCheckWorker : Worker
     {
+        readonly PriceAlarmService _alarmSvc;
+
         public FuelPriceCheckWorker(Context context, WorkerParameters parameters)
         : base(context, parameters)
         {
+            _alarmSvc = new PriceAlarmService();
         }
 
         public override Result DoWork()
         {
             try
             {
+                var x = _alarmSvc.GetPriceAlarmsAsync().Result;
+
+                //do price check
+                foreach (var alarm in _alarmSvc.GetPriceAlarmsAsync().Result)
+                {
+                    //get current price
+                    //check if current price is less than alarm target price
+                    //if yes: send notification
+                }
+
                 SendNotification("Preis niedrig!");
 
                 return Result.InvokeSuccess();
@@ -30,7 +44,7 @@ namespace Tankalarm.Platforms.Android
         }
 
         private void SendNotification(string message)
-        {
+        { 
             var channelId = "priceAlerts";
             var manager = AndroidApp.Context
                               .GetSystemService(AndroidContext.NotificationService)

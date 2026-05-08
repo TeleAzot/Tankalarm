@@ -6,24 +6,35 @@
     <button class="icon-lg bi bi-plus" @onclick="AddAlarm"></button>
 </header>
 
-<div class="alarmcard">
-    <span>Diesel</span>
-    <span>1,60 €</span>
-    <button class="icon-md bi bi-pencil"></button>
-    <button class="icon-md bi bi-trash"></button>
+<div class="alarmcard-container">
+    <div class="alarmcard">
+        <span>Diesel</span>
+        <span>1,60 €</span>
+        <button class="icon-md bi bi-pencil"></button>
+        <button class="icon-md bi bi-trash"></button>
+    </div>
+
+    <div class="alarmcard">
+        <span class="">Super E5</span>
+        <span class="">1,70 €</span>
+        <button class="icon-md bi bi-pencil"></button>
+        <button class="icon-md bi bi-trash"></button>
+    </div>
 </div>
 
-<div class="alarmcard">
-    <span class="">Super E5</span>
-    <span class="">1,70 €</span>
-    <button class="icon-md bi bi-pencil"></button>
-    <button class="icon-md bi bi-trash"></button>
-</div>
+<footer>
+    <button @onclick="NearbySearch">Umkreissuche</button>
+</footer>
 
 @code
 {
     private void AddAlarm()
     {
         NavigationManager.NavigateTo("AddAlarm");
+    }
+
+    private void NearbySearch()
+    {
+        NavigationManager.NavigateTo("NearbySearch");
     }
 }
