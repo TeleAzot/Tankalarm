@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using AndroidX.Core.Content;
 using AndroidX.Work;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using System.Net.Http;
@@ -31,6 +32,9 @@ namespace Tankalarm.Platforms.Android
                     //get current price
                     //check if current price is less than alarm target price
                     //if yes: send notification
+
+                    //wichtig: für jede Spritsorte eine feste Notification ID verwenden, sodass immer die alte überschrieben wird
+                    //=> so bekommt man nicht unendlich viele Notifications
                 }
 
                 SendNotification("Preis niedrig!");
@@ -44,7 +48,7 @@ namespace Tankalarm.Platforms.Android
         }
 
         private void SendNotification(string message)
-        { 
+        {
             var channelId = "priceAlerts";
             var manager = AndroidApp.Context
                               .GetSystemService(AndroidContext.NotificationService)
@@ -57,11 +61,22 @@ namespace Tankalarm.Platforms.Android
                 manager.CreateNotificationChannel(channel);
             }
 
-            var builder = new Notification.Builder(AndroidApp.Context, channelId)
-                .SetContentTitle("Preisalarm")
-                .SetContentText(message)
-                .SetSmallIcon(Resource.Drawable.notification_icon_background);
+            //intent is used for opening app when clicking on notification
+            var intent = new Intent(AndroidApp.Context, typeof(MainActivity));
+            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
 
+            var pendingIntent = PendingIntent.GetActivity(AndroidApp.Context, 0, intent, 
+                PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
+
+            var builder = new Notification.Builder(AndroidApp.Context, channelId)
+                    .SetContentTitle("Preisalarm")
+                    .SetContentText(message)
+                    .SetSmallIcon(Resource.Drawable.notification_icon_background)
+                    .SetContentIntent(pendingIntent)
+                    .SetAutoCancel(true);
+
+            //wichtig: für jede Spritsorte eine feste Notification ID verwenden, sodass immer die alte überschrieben wird
+            //=> so bekommt man nicht unendlich viele Notifications
             manager.Notify(1001, builder.Build());
         }
     }
