@@ -1,6 +1,6 @@
 ﻿@page "/"
-@using Tankalarm.Data.API.Services
 @inject NavigationManager NavigationManager
+@inject PriceAlarmService PriceAlarmSvc
 
 <header class="d-flex">
     <h2>Aktive Alarme</h2>
@@ -29,6 +29,23 @@
 
 @code
 {
+    protected override async Task OnInitializedAsync()
+    {
+        await Permissions.RequestAsync<Permissions.LocationAlways>();
+        //get last known location on start up for requesting all necessary permissions
+        var location = await Geolocation.Default.GetLastKnownLocationAsync();
+        await base.OnInitializedAsync();
+    }
+
+    // private async Task AddTmpAlarm()
+    // {
+    //     await PriceAlarmSvc.SavePriceAlarmAsync(new PriceAlarm
+    //     {
+    //         FuelType = "e5",
+    //         TargetPrice = 2
+    //     });
+    // }
+
     private void AddAlarm()
     {
         NavigationManager.NavigateTo("AddAlarm");

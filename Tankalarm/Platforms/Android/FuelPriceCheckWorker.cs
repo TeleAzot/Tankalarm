@@ -4,6 +4,8 @@ using AndroidX.Core.Content;
 using AndroidX.Work;
 using Microsoft.Maui.Controls.PlatformConfiguration;
 using System.Net.Http;
+using Tankalarm.Data.API.Models;
+using Tankalarm.Data.API.Services;
 using Tankalarm.Data.DB.DBServices;
 using AndroidApp = Android.App.Application;
 using AndroidContext = Android.Content.Context;
@@ -13,31 +15,41 @@ namespace Tankalarm.Platforms.Android
     public class FuelPriceCheckWorker : Worker
     {
         readonly PriceAlarmService _alarmSvc;
+        readonly TankerkoenigService _tankerkoenigSvc;
+        readonly DeviceLocation _deviceLocation;
+
+        //temp for emulator tests
+        const double lat = 48.797592, lon = 10.024963;
 
         public FuelPriceCheckWorker(Context context, WorkerParameters parameters)
         : base(context, parameters)
         {
             _alarmSvc = new PriceAlarmService();
+            _tankerkoenigSvc = new TankerkoenigService();
+            _deviceLocation = new DeviceLocation();
         }
 
         public override Result DoWork()
         {
             try
             {
-                var x = _alarmSvc.GetPriceAlarmsAsync().Result;
+                var alarms = _alarmSvc.GetPriceAlarmsAsync().Result;
+                if (alarms.Count() == 0)
+                    return Result.InvokeSuccess();
+
+                //get current phone location
+                Location? currentLocation = _deviceLocation.GetCurrentDeviceLocationAsync().Result;
+                if (currentLocation == null)
+                    return Result.InvokeFailure();
 
                 //do price check
-                foreach (var alarm in _alarmSvc.GetPriceAlarmsAsync().Result)
+                foreach (var alarm in alarms)
                 {
-                    //get current price
-                    //check if current price is less than alarm target price
-                    //if yes: send notification
-
-                    //wichtig: für jede Spritsorte eine feste Notification ID verwenden, sodass immer die alte überschrieben wird
-                    //=> so bekommt man nicht unendlich viele Notifications
+                    //get cheapest prices in radius of 5km and check if cheapest one matches the target price
+                    var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(lon, lat, 5, alarm.FuelType).Result;
+                    if (currentPrices.Count() > 0 && currentPrices.First().Price <= alarm.TargetPrice)
+                        SendNotification(currentPrices.First(), alarm.FuelType);
                 }
-
-                SendNotification("Preis niedrig!");
 
                 return Result.InvokeSuccess();
             }
@@ -47,7 +59,7 @@ namespace Tankalarm.Platforms.Android
             }
         }
 
-        private void SendNotification(string message)
+        private void SendNotification(FuelStation cheapestStation, string fuelType)
         {
             var channelId = "priceAlerts";
             var manager = AndroidApp.Context
@@ -69,15 +81,26 @@ namespace Tankalarm.Platforms.Android
                 PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
 
             var builder = new Notification.Builder(AndroidApp.Context, channelId)
-                    .SetContentTitle("Preisalarm")
-                    .SetContentText(message)
+                    .SetContentTitle($"Preisalarm {fuelType.ToUpper()}")
+                    .SetContentText($"{cheapestStation.Price}€ bei {cheapestStation.Name}")
                     .SetSmallIcon(Resource.Drawable.notification_icon_background)
                     .SetContentIntent(pendingIntent)
                     .SetAutoCancel(true);
 
             //wichtig: für jede Spritsorte eine feste Notification ID verwenden, sodass immer die alte überschrieben wird
             //=> so bekommt man nicht unendlich viele Notifications
-            manager.Notify(1001, builder.Build());
+            manager.Notify(GetNotificationIdForFuelType(fuelType), builder.Build());
+        }
+
+        private int GetNotificationIdForFuelType(string fuelType)
+        {
+            return fuelType switch
+            {
+                "diesel" => 1001,
+                "e5" => 2001,
+                "e10" => 30001,
+                _ => 9999
+            };
         }
     }
 }

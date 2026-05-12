@@ -32,9 +32,6 @@ namespace Tankalarm.Data.API.Services
             if (!jsonResponse.ok)
                 throw new Exception("Es ist ein unerwarteter Fehler beim Abrufen der günstigsten Spritpreise im Umkreis aufgetreten.");
 
-            if (jsonResponse.stations.Count == 0)
-                throw new Exception("Im Radius der geografischen Koordinaten konnten mit der Umkreissuche keine Tankstellen gefunden werden.");
-
             List<FuelStation> stations = new List<FuelStation>();
             foreach (var s in jsonResponse.stations)
             {
