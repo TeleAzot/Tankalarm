@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:Tankalarm"
              xmlns:components="clr-namespace:Tankalarm.Components"
-             x:Class="Tankalarm.MainPage">
+             x:Class="Tankalarm.MainPage"
+             SafeAreaEdges="All">
 
     <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>

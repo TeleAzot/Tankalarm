@@ -1,6 +1,6 @@
 /*#region Header*/
 header {
-    margin: 3em 0 1em 0;
+    margin: 0 0 1em 0;
     padding: 0.3em 1em;
     background-color: #219bff;
 }
@@ -76,7 +76,7 @@ footer {
     align-items: center;
     height: 2em;
     position: fixed;
-    bottom: 3em;
+    bottom: 0.5em;
     left: 0.5em;
     right: 0.5em;
 }

@@ -46,7 +46,7 @@ namespace Tankalarm.Platforms.Android
                 foreach (var alarm in alarms)
                 {
                     //get cheapest prices in radius of 5km and check if cheapest one matches the target price
-                    var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(lon, lat, 5, alarm.FuelType).Result;
+                    var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(currentLocation.Longitude, currentLocation.Latitude, 5, alarm.FuelType).Result;
                     if (currentPrices.Count() > 0 && currentPrices.First().Price <= alarm.TargetPrice)
                         SendNotification(currentPrices.First(), alarm.FuelType);
                 }
@@ -87,8 +87,6 @@ namespace Tankalarm.Platforms.Android
                     .SetContentIntent(pendingIntent)
                     .SetAutoCancel(true);
 
-            //wichtig: für jede Spritsorte eine feste Notification ID verwenden, sodass immer die alte überschrieben wird
-            //=> so bekommt man nicht unendlich viele Notifications
             manager.Notify(GetNotificationIdForFuelType(fuelType), builder.Build());
         }
 

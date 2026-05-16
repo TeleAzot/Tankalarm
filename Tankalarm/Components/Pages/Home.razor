@@ -7,21 +7,20 @@
     <button class="icon-lg bi bi-plus" @onclick="AddAlarm"></button>
 </header>
 
-<div class="alarmcard-container">
-    <div class="alarmcard">
-        <span>Diesel</span>
-        <span>1,60 €</span>
-        <button class="icon-md bi bi-pencil"></button>
-        <button class="icon-md bi bi-trash"></button>
+@if (alarms != null)
+{
+    <div class="alarmcard-container">
+        @foreach (var alarm in alarms)
+        {
+            <div class="alarmcard">
+                <span>@alarm.FuelType.ToUpper()</span>
+                <span>@alarm.TargetPrice €</span>
+                <button disabled class="icon-md bi bi-pencil"></button>
+                <button class="icon-md bi bi-trash" @onclick="async () => await DeleteAlarm(alarm)"></button>
+            </div>
+        }
     </div>
-
-    <div class="alarmcard">
-        <span class="">Super E5</span>
-        <span class="">1,70 €</span>
-        <button class="icon-md bi bi-pencil"></button>
-        <button class="icon-md bi bi-trash"></button>
-    </div>
-</div>
+}
 
 <footer>
     <button @onclick="NearbySearch">Umkreissuche</button>
@@ -29,22 +28,20 @@
 
 @code
 {
+    IEnumerable<PriceAlarm> alarms;
+
     protected override async Task OnInitializedAsync()
     {
         await Permissions.RequestAsync<Permissions.LocationAlways>();
-        //get last known location on start up for requesting all necessary permissions
-        var location = await Geolocation.Default.GetLastKnownLocationAsync();
+        alarms = await PriceAlarmSvc.GetPriceAlarmsAsync();
         await base.OnInitializedAsync();
     }
 
-    // private async Task AddTmpAlarm()
-    // {
-    //     await PriceAlarmSvc.SavePriceAlarmAsync(new PriceAlarm
-    //     {
-    //         FuelType = "e5",
-    //         TargetPrice = 2
-    //     });
-    // }
+    private async Task DeleteAlarm(PriceAlarm alarm)
+    {
+        await PriceAlarmSvc.DeletePriceAlarmAsync(alarm);
+        alarms = await PriceAlarmSvc.GetPriceAlarmsAsync();
+    }
 
     private void AddAlarm()
     {
