@@ -49,5 +49,34 @@ namespace Tankalarm.Data.API.Services
             }
             return stations;
         }
+
+        public async Task<IEnumerable<FuelStation>> GetCheapestFuelPricesAsync(double lon, double lat, int radius, string fuelType, string sort)
+        {
+            var responseMessage = await _client.GetAsync($"list.php?lat={lat}&lng={lon}&rad={radius}&type={fuelType.ToLower()}&sort={sort}&apikey={Secrets.TankerkoenigAPIKey}");
+            if (!responseMessage.IsSuccessStatusCode)
+                throw new Exception(await responseMessage.Content.ReadAsStringAsync());
+
+            var jsonResponse = JsonSerializer.Deserialize<TankerkoenigResponse>(await responseMessage.Content.ReadAsStringAsync());
+
+            if (!jsonResponse.ok)
+                throw new Exception("Es ist ein unerwarteter Fehler beim Abrufen der günstigsten Spritpreise im Umkreis aufgetreten.");
+
+            List<FuelStation> stations = new List<FuelStation>();
+            foreach (var s in jsonResponse.stations)
+            {
+                stations.Add(new FuelStation
+                {
+                    Name = s.name,
+                    Brand = s.brand,
+                    Street = s.street,
+                    City = s.place,
+                    PostCode = s.postCode,
+                    Distance = s.dist,
+                    Price = s.price,
+                    IsOpen = s.isOpen
+                });
+            }
+            return stations;
+        }
     }
 }

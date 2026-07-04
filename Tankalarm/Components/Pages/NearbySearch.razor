@@ -6,10 +6,94 @@
     <button class="icon-lg bi bi-house" @onclick="Home"></button>
 </header>
 
+<form @onsubmit="Search">
+    <label for="fuelType">Spritsorte:</label>
+    <select @bind="FuelType" id="fuelType" required>
+        <option disabled selected>---Spritsorte wählen---</option>
+        <option>E5</option>
+        <option>Diesel</option>
+    </select>
+    <br />
+    <label for="radius">Umkreis:</label>
+    <select @bind="radius" id="radius" required>
+        <option value="2">2 km</option>
+        <option value="5" selected>5 km</option>
+        <option value="10">10 km</option>
+        <option value="20">20 km</option>
+    </select>
+    <br />
+    <label for="sortby">Sortieren nach:</label>
+    <select @bind="sortBy" id="sortby" required>
+        <option value="PRICE" selected>Preis</option>
+        <option value="DISTANCE">Distanz</option>
+    </select>
+    <br />
+    <button type="submit">Suche starten</button>
+</form>
+
+@if (results != null)
+{
+    @foreach (var station in results)
+    {
+        <div class="station-card">
+            <div class="station-header">
+                <div class="station-name">@station.Name</div>
+
+                @{
+                    var price = station.Price.ToString("0.000");
+                    var parts = price.Split('.');
+                }
+                <div class="station-price">
+                    @parts[0],@parts[1].Substring(0, 2)<sup>@parts[1][2]</sup>&nbsp€
+                </div>
+            </div>
+
+            <div class="station-address">
+                @station.Street @station.City
+            </div>
+
+            <div class="station-footer">
+                @station.Distance.ToString("0.0") km entfernt
+            </div>
+        </div>
+    }
+}
+
 @code
 {
     [SupplyParameterFromQuery(Name = "fuelType")]
     public string? FuelType { get; set; }
+    int radius { get; set; } = 5;
+    string sortBy { get; set; }
+
+    IEnumerable<FuelStation> results;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(FuelType))
+            await Search();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task Search()
+    {
+        if (string.IsNullOrEmpty(FuelType))
+            return;
+
+        //get current phone location
+        DeviceLocation deviceLocation = new DeviceLocation();
+        Location? currentLocation = await deviceLocation.GetCurrentDeviceLocationAsync();
+        if (currentLocation == null)
+            return;
+
+        TankerkoenigService tankerKoenigSvc = new TankerkoenigService();
+        const double lat = 48.797592, lon = 10.024963;
+
+        if (sortBy == "DISTANCE")
+            results = await tankerKoenigSvc.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "dist");
+        else
+            results = await tankerKoenigSvc.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "price");
+    }
 
     private void Home()
     {
