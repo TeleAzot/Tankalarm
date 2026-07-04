@@ -1,4 +1,5 @@
 ﻿using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using AndroidX.Work;
@@ -14,6 +15,7 @@ namespace Tankalarm
             base.OnCreate(savedInstanceState);
 
             SchedulePriceCheckWorker();
+            HandleIntent(Intent);
         }
 
         /// <summary>
@@ -47,6 +49,24 @@ namespace Tankalarm
                     "price_check_worker",                 
                     ExistingPeriodicWorkPolicy.Keep,
                     request);
+        }
+
+        protected override void OnNewIntent(Intent? intent)
+        {
+            base.OnNewIntent(intent);
+
+            HandleIntent(intent);
+        }
+
+        private void HandleIntent(Intent? intent)
+        {
+            //check if app was opened by notification intent
+            var route = intent?.GetStringExtra("route");
+
+            if (!string.IsNullOrEmpty(route))
+            {
+                NotificationNavigationService.SetRoute(route);
+            }
         }
     }
 }

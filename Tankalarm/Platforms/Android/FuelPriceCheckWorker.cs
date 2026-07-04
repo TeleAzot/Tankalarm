@@ -46,7 +46,8 @@ namespace Tankalarm.Platforms.Android
                 foreach (var alarm in alarms)
                 {
                     //get cheapest prices in radius of 5km and check if cheapest one matches the target price
-                    var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(currentLocation.Longitude, currentLocation.Latitude, 5, alarm.FuelType).Result;
+                    //var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(currentLocation.Longitude, currentLocation.Latitude, 5, alarm.FuelType).Result;
+                    var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(lon, lat, 5, alarm.FuelType).Result;
                     if (currentPrices.Count() > 0 && currentPrices.First().Price <= alarm.TargetPrice)
                         SendNotification(currentPrices.First(), alarm.FuelType);
                 }
@@ -61,7 +62,7 @@ namespace Tankalarm.Platforms.Android
 
         private void SendNotification(FuelStation cheapestStation, string fuelType)
         {
-            var channelId = "priceAlerts";
+            var channelId = $"priceAlerts";
             var manager = AndroidApp.Context
                               .GetSystemService(AndroidContext.NotificationService)
                               as NotificationManager;
@@ -77,7 +78,10 @@ namespace Tankalarm.Platforms.Android
             var intent = new Intent(AndroidApp.Context, typeof(MainActivity));
             intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
 
-            var pendingIntent = PendingIntent.GetActivity(AndroidApp.Context, 0, intent, 
+            //route that will be opened when clicking on notification
+            intent.PutExtra("route", $"/NearbySearch?fuelType={fuelType}");
+
+            var pendingIntent = PendingIntent.GetActivity(AndroidApp.Context, GetNotificationIdForFuelType(fuelType), intent, 
                 PendingIntentFlags.Immutable | PendingIntentFlags.UpdateCurrent);
 
             var builder = new Notification.Builder(AndroidApp.Context, channelId)
@@ -92,11 +96,11 @@ namespace Tankalarm.Platforms.Android
 
         private int GetNotificationIdForFuelType(string fuelType)
         {
-            return fuelType switch
+            return fuelType.ToLower() switch
             {
                 "diesel" => 1001,
                 "e5" => 2001,
-                "e10" => 30001,
+                "e10" => 3001,
                 _ => 9999
             };
         }

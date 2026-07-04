@@ -8,6 +8,9 @@
 
 @code
 {
+    [SupplyParameterFromQuery(Name = "fuelType")]
+    public string? FuelType { get; set; }
+
     private void Home()
     {
         NavigationManager.NavigateTo("/");

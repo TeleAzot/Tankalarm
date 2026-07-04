@@ -1,3 +1,29 @@
-﻿@inherits LayoutComponentBase
+﻿@inject NavigationManager Navigation
+@inherits LayoutComponentBase
+@implements IDisposable
 
 @Body
+
+@code
+{
+    protected override void OnInitialized()
+    {
+        NotificationNavigationService.RouteReceived += OnRouteReceived;
+        var route = NotificationNavigationService.ConsumePendingRoute();
+        if (!string.IsNullOrEmpty(route))
+            Navigation.NavigateTo(route);
+    }
+
+    private void OnRouteReceived(string route)
+    {
+        InvokeAsync(() =>
+        {
+            Navigation.NavigateTo(route);
+        });
+    }
+
+    public void Dispose()
+    {
+        NotificationNavigationService.RouteReceived -= OnRouteReceived;
+    }
+}
