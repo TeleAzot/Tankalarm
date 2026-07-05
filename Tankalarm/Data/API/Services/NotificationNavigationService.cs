@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Tankalarm.Platforms.Android
+namespace Tankalarm.Data.API.Services
 {
     public static class NotificationNavigationService
     {
