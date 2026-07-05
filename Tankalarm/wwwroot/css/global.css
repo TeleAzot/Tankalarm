@@ -81,11 +81,16 @@ form > * {
     margin: 1em 0;
 }
 
-form > input, form > select {
+form > input[type="text"], form > input[type="number"], form > select {
     width: 40%;
     height: 2em;
     float: right;
     margin-right: 1em;
+}
+
+form > input[type="checkbox"] {
+    height: 2em;
+    float: left;
 }
 
 form > select {

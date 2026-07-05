@@ -14,5 +14,7 @@ namespace Tankalarm.Data.API.DTO
         public double lon { get; set; }
 
         public double lat { get; set; }
+
+        public string formatted { get; set; }
     }
 }

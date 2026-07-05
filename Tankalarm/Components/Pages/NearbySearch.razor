@@ -1,12 +1,43 @@
 ﻿@page "/NearbySearch"
 @inject NavigationManager NavigationManager
+@inject TankerkoenigService TankerkoenigService
+@inject GeoCodeService GeoCodeService
 
 <header class="d-flex">
     <h2>Umkreissuche</h2>
     <button class="icon-lg bi bi-house" @onclick="Home"></button>
 </header>
 
-<form @onsubmit="Search">
+<form @onsubmit="SearchFuelStations">
+    <input @bind="useCurrentLocation" type="checkbox" id="currentLocation" />
+    <label for="currentLocation">Aktuellen Standort benutzen</label>
+    <br />
+
+    @if (!useCurrentLocation)
+    {
+        <div class="autocomplete">
+            <label for="customLocation">Standort suchen:</label>
+            <input type="text"
+                   id="customLocation"   
+                   class="form-control"
+                   @bind="CustomLocationQuery"
+                   @bind:event="oninput" />
+
+            @if (customLocationSuggestions != null)
+            {
+                <ul class="list-group">
+                    @foreach (var loc in customLocationSuggestions)
+                    {
+                        <li class="list-group-item"
+                            @onclick="() => SelectLocation(loc)">
+                            @loc.LocationName
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    }    
+
     <label for="fuelType">Spritsorte:</label>
     <select @bind="FuelType" id="fuelType" required>
         <option disabled selected>---Spritsorte wählen---</option>
@@ -31,9 +62,9 @@
     <button type="submit">Suche starten</button>
 </form>
 
-@if (results != null)
+@if (resultFuelStations != null)
 {
-    @foreach (var station in results)
+    @foreach (var station in resultFuelStations)
     {
         <div class="station-card">
             <div class="station-header">
@@ -58,41 +89,101 @@
         </div>
     }
 }
+else if (resultFuelStations != null && resultFuelStations.Count() == 0)
+{
+    <p>Keine Tankstellen gefunden.</p>    
+}
 
 @code
 {
     [SupplyParameterFromQuery(Name = "fuelType")]
     public string? FuelType { get; set; }
-    int radius { get; set; } = 5;
-    string sortBy { get; set; }
+    public string CustomLocationQuery
+    {
+        get => field;
+        set
+        {
+            if (field != value && selectedCustomLocation == null)
+            {
+                field = value;
+                SearchChanged?.Invoke(value);
+            }
+        }
+    }
 
-    IEnumerable<FuelStation> results;
+    bool useCurrentLocation = true;
+    int radius = 5;
+    string sortBy;
+    Coordinates selectedCustomLocation;
+
+    private CancellationTokenSource? _cts;
+
+    IEnumerable<FuelStation> resultFuelStations;
+    IEnumerable<Coordinates> customLocationSuggestions;
 
     protected override async Task OnInitializedAsync()
     {
+        SearchChanged += LoadCustomLocationSuggestions;
         if (!string.IsNullOrEmpty(FuelType))
-            await Search();
+            await SearchFuelStations();
         await base.OnInitializedAsync();
     }
 
-    private async Task Search()
+    event Func<string, Task>? SearchChanged;
+    private async Task LoadCustomLocationSuggestions(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || text.Length < 3)
+        {
+            customLocationSuggestions = null;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        await Task.Delay(300, _cts.Token); // Debounce
+
+        customLocationSuggestions = await GeoCodeService.GetAutoCompleteCitySuggestionsAsync(CustomLocationQuery);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SelectLocation(Coordinates location)
+    {
+        selectedCustomLocation = location;
+        CustomLocationQuery = location.LocationName;
+        customLocationSuggestions = null;
+    }
+
+    private async Task SearchFuelStations()
     {
         if (string.IsNullOrEmpty(FuelType))
             return;
 
-        //get current phone location
-        DeviceLocation deviceLocation = new DeviceLocation();
-        Location? currentLocation = await deviceLocation.GetCurrentDeviceLocationAsync();
-        if (currentLocation == null)
+        double lat, lon;
+        if (useCurrentLocation)
+        {
+            //get current phone location
+            DeviceLocation deviceLocation = new DeviceLocation();
+            Location? currentLocation = await deviceLocation.GetCurrentDeviceLocationAsync();
+            if (currentLocation == null)
+                return;
+            lat = 48.797592;
+            lon = 10.024963;
+        }
+        else if (selectedCustomLocation != null)
+        {
+            lat = selectedCustomLocation.Latitude;
+            lon = selectedCustomLocation.Longitude;
+        }
+        else
             return;
 
-        TankerkoenigService tankerKoenigSvc = new TankerkoenigService();
-        const double lat = 48.797592, lon = 10.024963;
-
         if (sortBy == "DISTANCE")
-            results = await tankerKoenigSvc.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "dist");
+            resultFuelStations = await TankerkoenigService.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "dist");
         else
-            results = await tankerKoenigSvc.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "price");
+            resultFuelStations = await TankerkoenigService.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "price");
     }
 
     private void Home()

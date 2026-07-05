@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
@@ -34,8 +35,30 @@ namespace Tankalarm.Data.API.Services
             return new Coordinates
             {
                 Longitude = jsonResponse.results.First().lon,
-                Latitude = jsonResponse.results.First().lat
+                Latitude = jsonResponse.results.First().lat,
+                LocationName = jsonResponse.results.First().formatted
             };
+        }
+
+        public async Task<IEnumerable<Coordinates>> GetAutoCompleteCitySuggestionsAsync(string query)
+        {
+            var responseMessage = await _client.GetAsync($"autocomplete?&text={query}&limit=5&lang=de&format=json&apiKey={Secrets.GeocodeAPIKey}");
+            if (!responseMessage.IsSuccessStatusCode)
+                throw new Exception(await responseMessage.Content.ReadAsStringAsync());
+
+            var jsonResponse = JsonSerializer.Deserialize<GeoResponse>(await responseMessage.Content.ReadAsStringAsync());
+
+            List<Coordinates> results = new List<Coordinates>();
+            foreach (var result in jsonResponse.results)
+            {
+                results.Add(new Coordinates
+                {
+                    Longitude = result.lon,
+                    Latitude = result.lat,
+                    LocationName = result.formatted
+                });
+            }
+            return results;
         }
     }
 }
