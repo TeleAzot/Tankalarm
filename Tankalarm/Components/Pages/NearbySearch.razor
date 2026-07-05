@@ -9,16 +9,17 @@
 </header>
 
 <form @onsubmit="SearchFuelStations">
-    <input @bind="useCurrentLocation" type="checkbox" id="currentLocation" />
-    <label for="currentLocation">Aktuellen Standort benutzen</label>
-    <br />
+    <div class="form-check">
+        <input @bind="useCurrentLocation" type="checkbox" id="currentLocation" />
+        <label for="currentLocation">Aktuellen Standort benutzen</label>
+    </div>
 
     @if (!useCurrentLocation)
     {
         <div class="autocomplete">
             <label for="customLocation">Standort suchen:</label>
             <input type="text"
-                   id="customLocation"   
+                   id="customLocation"
                    class="form-control"
                    @bind="CustomLocationQuery"
                    @bind:event="oninput" />
@@ -36,30 +37,49 @@
                 </ul>
             }
         </div>
-    }    
+    }
 
-    <label for="fuelType">Spritsorte:</label>
-    <select @bind="FuelType" id="fuelType" required>
-        <option disabled selected>---Spritsorte wählen---</option>
-        <option>E5</option>
-        <option>Diesel</option>
-    </select>
-    <br />
-    <label for="radius">Umkreis:</label>
-    <select @bind="radius" id="radius" required>
-        <option value="2">2 km</option>
-        <option value="5" selected>5 km</option>
-        <option value="10">10 km</option>
-        <option value="20">20 km</option>
-    </select>
-    <br />
-    <label for="sortby">Sortieren nach:</label>
-    <select @bind="sortBy" id="sortby" required>
-        <option value="PRICE" selected>Preis</option>
-        <option value="DISTANCE">Distanz</option>
-    </select>
-    <br />
-    <button type="submit">Suche starten</button>
+    <div class="form-row">
+        <label for="fuelType">Spritsorte: </label>
+
+        <select @bind="FuelType" id="fuelType" required>
+            <option disabled selected>---Spritsorte wählen---</option>
+            <option>E5</option>
+            <option>Diesel</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="radius">Umkreis:</label>
+
+        <select @bind="radius" id="radius" required>
+            <option value="2">2 km</option>
+            <option value="5" selected>5 km</option>
+            <option value="10">10 km</option>
+            <option value="20">20 km</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="sortby">Sortieren nach:</label>
+
+        <select @bind="sortBy" id="sortby" required>
+            <option value="PRICE" selected>Preis</option>
+            <option value="DISTANCE">Distanz</option>
+        </select>
+    </div>
+
+    <button type="submit" disabled="@isSearching">
+        @if (isSearching)
+        {
+            <span class="spinner"></span>
+            <span>Suche läuft...</span>
+        }
+        else
+        {
+            <span>Suche starten</span>
+        }
+    </button>
 </form>
 
 @if (resultFuelStations != null)
@@ -89,9 +109,15 @@
         </div>
     }
 }
-else if (resultFuelStations != null && resultFuelStations.Count() == 0)
+@if (resultFuelStations != null && !resultFuelStations.Any())
 {
-    <p>Keine Tankstellen gefunden.</p>    
+    <div class="info-message">
+        <i class="bi bi-info-circle"></i>
+        <div>
+            <strong>Keine Tankstellen gefunden</strong>
+            <span>Für die gewählten Suchkriterien wurden keine passenden Tankstellen gefunden.</span>
+        </div>
+    </div>
 }
 
 @code
@@ -116,7 +142,8 @@ else if (resultFuelStations != null && resultFuelStations.Count() == 0)
     string sortBy;
     Coordinates selectedCustomLocation;
 
-    private CancellationTokenSource? _cts;
+    bool isSearching;
+    CancellationTokenSource? _cts;
 
     IEnumerable<FuelStation> resultFuelStations;
     IEnumerable<Coordinates> customLocationSuggestions;
@@ -161,29 +188,39 @@ else if (resultFuelStations != null && resultFuelStations.Count() == 0)
         if (string.IsNullOrEmpty(FuelType))
             return;
 
+        isSearching = true;
         double lat, lon;
-        if (useCurrentLocation)
-        {
-            //get current phone location
-            DeviceLocation deviceLocation = new DeviceLocation();
-            Location? currentLocation = await deviceLocation.GetCurrentDeviceLocationAsync();
-            if (currentLocation == null)
-                return;
-            lat = 48.797592;
-            lon = 10.024963;
-        }
-        else if (selectedCustomLocation != null)
-        {
-            lat = selectedCustomLocation.Latitude;
-            lon = selectedCustomLocation.Longitude;
-        }
-        else
-            return;
 
-        if (sortBy == "DISTANCE")
-            resultFuelStations = await TankerkoenigService.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "dist");
-        else
-            resultFuelStations = await TankerkoenigService.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "price");
+        try
+        {
+            if (useCurrentLocation)
+            {
+                //get current phone location
+                DeviceLocation deviceLocation = new DeviceLocation();
+                Location? currentLocation = await deviceLocation.GetCurrentDeviceLocationAsync();
+                if (currentLocation == null)
+                    return;
+
+                lat = currentLocation.Latitude;
+                lon = currentLocation.Longitude;
+            }
+            else if (selectedCustomLocation != null)
+            {
+                lat = selectedCustomLocation.Latitude;
+                lon = selectedCustomLocation.Longitude;
+            }
+            else
+                return;
+
+            if (sortBy == "DISTANCE")
+                resultFuelStations = await TankerkoenigService.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "dist");
+            else
+                resultFuelStations = await TankerkoenigService.GetCheapestFuelPricesAsync(lon, lat, radius, FuelType, "price");
+        }
+        finally
+        {
+            isSearching = false;
+        }
     }
 
     private void Home()

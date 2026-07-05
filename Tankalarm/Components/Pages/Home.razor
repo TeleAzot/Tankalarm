@@ -14,9 +14,10 @@
         {
             <div class="alarmcard">
                 <span>@alarm.FuelType.ToUpper()</span>
-                <span>@alarm.TargetPrice €</span>
-                <button disabled class="icon-md bi bi-pencil"></button>
-                <button class="icon-md bi bi-trash" @onclick="async () => await DeleteAlarm(alarm)"></button>
+                <span class="alarmcard-price">@alarm.TargetPrice.ToString("0.00") €</span>
+                <button class="bi bi-trash"
+                        @onclick="async () => await DeleteAlarm(alarm)">
+                </button>
             </div>
         }
     </div>

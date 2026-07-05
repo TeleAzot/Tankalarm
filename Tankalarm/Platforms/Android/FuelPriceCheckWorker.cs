@@ -47,7 +47,7 @@ namespace Tankalarm.Platforms.Android
                 {
                     //get cheapest prices in radius of 5km and check if cheapest one matches the target price
                     //var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(currentLocation.Longitude, currentLocation.Latitude, 5, alarm.FuelType).Result;
-                    var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(lon, lat, 5, alarm.FuelType).Result;
+                    var currentPrices = _tankerkoenigSvc.GetCheapestFuelPricesAsync(currentLocation.Longitude, currentLocation.Latitude, 5, alarm.FuelType).Result;
                     if (currentPrices.Count() > 0 && currentPrices.First().Price <= alarm.TargetPrice)
                         SendNotification(currentPrices.First(), alarm.FuelType);
                 }
