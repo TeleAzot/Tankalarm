@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Graphics;
 using AndroidX.Core.Content;
 using AndroidX.Work;
 using Microsoft.Maui.Controls.PlatformConfiguration;
@@ -87,7 +88,7 @@ namespace Tankalarm.Platforms.Android
             var builder = new Notification.Builder(AndroidApp.Context, channelId)
                     .SetContentTitle($"Preisalarm {fuelType.ToUpper()}")
                     .SetContentText($"{cheapestStation.Price}€ bei {cheapestStation.Name}")
-                    .SetSmallIcon(Resource.Drawable.notification_icon_background)
+                    .SetSmallIcon(Resource.Mipmap.appicon)
                     .SetContentIntent(pendingIntent)
                     .SetAutoCancel(true);
 

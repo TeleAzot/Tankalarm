@@ -92,7 +92,7 @@
 
                 @{
                     var price = station.Price.ToString("0.000");
-                    var parts = price.Split('.');
+                    var parts = price.Contains('.') ? price.Split('.') : price.Split(',');
                 }
                 <div class="station-price">
                     @parts[0],@parts[1].Substring(0, 2)<sup>@parts[1][2]</sup>&nbsp€
